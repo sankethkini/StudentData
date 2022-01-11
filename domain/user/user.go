@@ -6,6 +6,6 @@ type User struct {
 	Fname   string
 	Age     int
 	Adress  string
-	RollNo  int
+	RollNo  string
 	Courses []course.Course
 }
