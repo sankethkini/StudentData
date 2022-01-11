@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/sankethkini/StudentData/domain/course"
 	"github.com/sankethkini/StudentData/domain/user"
 )
 
@@ -13,6 +14,29 @@ var tests = []user.User{
 		RollNo: "44s",
 		Age:    12,
 		Adress: "2 232 ",
+	},
+	{
+		Fname:  "sanket",
+		RollNo: "44s",
+		Age:    12,
+		Adress: "2 232 ",
+		Courses: []course.Course{
+			{
+				Name: "A",
+				Code: "A",
+			},
+			{
+				Name: "B",
+				Code: "B",
+			},
+		},
+	},
+	{
+		Fname:   "sanket",
+		RollNo:  "44s",
+		Age:     12,
+		Adress:  "2 232 ",
+		Courses: nil,
 	},
 }
 
