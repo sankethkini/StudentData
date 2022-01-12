@@ -30,3 +30,4 @@ var AllCourses = []course.Course{
 }
 
 const NoOfCourses int = 4
+const Filelocation = "/Users/sanketh/coding/StudentData/savedfiles/data.json"
