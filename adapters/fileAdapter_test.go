@@ -16,7 +16,7 @@ var tests = []user.User{
 		Adress: "2 232 ",
 	},
 	{
-		Fname:  "sanket",
+		Fname:  "sanket1",
 		RollNo: "44s",
 		Age:    12,
 		Adress: "2 232 ",
@@ -32,7 +32,7 @@ var tests = []user.User{
 		},
 	},
 	{
-		Fname:   "sanket",
+		Fname:   "sanket2",
 		RollNo:  "44s",
 		Age:     12,
 		Adress:  "2 232 ",
@@ -41,20 +41,24 @@ var tests = []user.User{
 }
 
 func TestSaveAndRetrive(t *testing.T) {
+
 	fileAdapter := FileAdapter{}
 	err := fileAdapter.Save(tests)
 	if err != nil {
 		t.Error(err)
 	}
-	data, err := fileAdapter.RetriveAll("")
+
+	data, err := fileAdapter.RetriveAll("", 1)
 	if err != nil {
 		t.Error(err)
 	}
 	if reflect.TypeOf(data) != reflect.TypeOf(tests) {
 		t.Error("not of right type", reflect.TypeOf(data))
 	}
+
+	curdata := data.([]user.User)
 	for i, val := range tests {
-		if data[i].RollNo != tests[i].RollNo {
+		if curdata[i].RollNo != tests[i].RollNo {
 			t.Error("records not mathcing", val, data)
 		}
 	}
