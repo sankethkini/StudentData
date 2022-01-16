@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/sankethkini/StudentData/adapters"
+	"github.com/sankethkini/StudentData/adapter/memory"
 	"github.com/sankethkini/StudentData/constants"
 	"github.com/sankethkini/StudentData/domain/user"
 )
@@ -18,10 +18,10 @@ var testForValidator = []struct {
 }{
 	{fname: "sanket", rollnum: "t77", adress: "abcd, defgh, jiop", age: 17, expected: nil},
 	{fname: "", rollnum: "t77", adress: "abcd, defgh, jiop", age: 18, expected: NoNameErr},
-	{fname: "sanket", rollnum: "", adress: "", age: 18, expected: NoRollNum},
-	{fname: "sanket", rollnum: "t77", adress: "abcd, defgh, jiop", age: 0, expected: AgeErr},
-	{fname: "sanket", rollnum: "t77", adress: "abcd, defgh, jiop", age: -18, expected: AgeErr},
-	{fname: "sanket", rollnum: "t78", adress: "abcd, defgh, jiop", age: 18, expected: nil},
+	{fname: "sanket1", rollnum: "", adress: "", age: 18, expected: NoRollNum},
+	{fname: "sanket2", rollnum: "t77", adress: "abcd, defgh, jiop", age: 0, expected: AgeErr},
+	{fname: "sanket3", rollnum: "t77", adress: "abcd, defgh, jiop", age: -18, expected: AgeErr},
+	{fname: "sanket4", rollnum: "t78", adress: "abcd, defgh, jiop", age: 18, expected: nil},
 	{fname: "sanket22", rollnum: "t79", adress: "abcd, defgh, jiop", age: 16, expected: nil},
 }
 
@@ -37,7 +37,7 @@ func TestDataValidator(t *testing.T) {
 
 		err := inputValidator(userdata)
 		if err != val.expected {
-			t.Error("error in testcase #1", val.expected, err)
+			t.Errorf("error in validation exp:%v got: %v", val.expected, err)
 		}
 	}
 }
@@ -54,10 +54,10 @@ func TestAdd(t *testing.T) {
 		userdata["age"] = val.age
 		userdata["courses"] = constants.AllCourses[:4]
 
-		data, err := Add(userdata)
+		_, err := Add(userdata)
 		if err != nil {
 			if err != val.expected {
-				t.Error(1, err, data)
+				t.Errorf("error in adding exp:%v got %v", val.expected, err)
 			}
 		}
 
@@ -80,7 +80,7 @@ var testsForDisplay = []struct {
 //check for age sorting
 func isDataAgesorted(data []user.User) bool {
 	for i := 1; i < len(data); i++ {
-		if data[i].Age > data[i].Age {
+		if data[i-1].Age > data[i].Age {
 			return false
 		}
 	}
@@ -90,7 +90,7 @@ func isDataAgesorted(data []user.User) bool {
 //check for rollnum sorting
 func isDataRollnumsorted(data []user.User) bool {
 	for i := 1; i < len(data); i++ {
-		if data[i].RollNo > data[i].RollNo {
+		if data[i-1].RollNo > data[i].RollNo {
 			return false
 		}
 	}
@@ -100,7 +100,7 @@ func isDataRollnumsorted(data []user.User) bool {
 //check for namewise sorting
 func isDataNamesorted(data []user.User) bool {
 	for i := 1; i < len(data); i++ {
-		if data[i].Fname > data[i].Fname {
+		if data[i-1].Fname > data[i].Fname {
 			return false
 		}
 	}
@@ -173,7 +173,7 @@ func TestForDelete(t *testing.T) {
 	msg, err = Delete(mp)
 	if err == nil {
 		t.Error("record is not deleted properly")
-	} else if err != adapters.RecordNotFound {
+	} else if err != memory.RecordNotFound {
 		t.Error("not a proper error message", msg)
 	}
 }

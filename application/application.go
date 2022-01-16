@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sankethkini/StudentData/adapters"
+	"github.com/sankethkini/StudentData/adapter"
+	"github.com/sankethkini/StudentData/adapter/file"
+	"github.com/sankethkini/StudentData/adapter/memory"
 	"github.com/sankethkini/StudentData/domain/course"
 	"github.com/sankethkini/StudentData/domain/user"
 )
@@ -12,35 +14,46 @@ import (
 //alisaing map
 type data map[string]interface{}
 
+//global access
+var adpt *adapter.Adapter
+
 //init function called one time
 func init() {
 
 	//intializing file adapter
-	fileAdapter, err := adapters.Init(adapters.FILE)
+	fileAdapter, err := file.NewFileAdapter()
 	if err != nil {
 		fmt.Println(err)
-		Exit(nil)
+		os.Exit(1)
 	}
 
 	//intializing memory adapter
-	memoryAdapter, err := adapters.Init(adapters.MEMORY)
+	memoryAdapter, err := memory.NewMemory()
 	if err != nil {
 		fmt.Println(err)
-		Exit(nil)
+		os.Exit(1)
 	}
 
-	//retriving all data from disk
-	diskdata, err := fileAdapter.RetriveAll("", 1)
+	//intializing adapter
+	adpt, err = adapter.NewAdapter(fileAdapter, memoryAdapter)
 	if err != nil {
 		fmt.Println(err)
-		Exit(nil)
+		os.Exit(1)
 	}
 
-	//adding into memory
-	err = memoryAdapter.Save(diskdata)
+	fileToMemory()
+}
+
+func fileToMemory() {
+	users, err := adpt.FileAdapter.RetriveAll()
 	if err != nil {
 		fmt.Println(err)
-		Exit(nil)
+		os.Exit(1)
+	}
+	err = adpt.MemoryAdapter.Save(users)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
 }
 
@@ -85,14 +98,9 @@ func inputValidator(userdata data) error {
 
 //validations for rollnumber exists
 func checkForRoll(rollnum string) error {
-	//intializing memory adapter
-	memoryAdapter, err := adapters.Init(adapters.MEMORY)
-	if err != nil {
-		return err
-	}
 
 	//checking existence of simialr rollnum
-	isExists := memoryAdapter.Retrive("rollnum", rollnum)
+	isExists := adpt.MemoryAdapter.Retrive("rollnum", rollnum)
 	if isExists {
 		return RollExists
 	}
@@ -115,12 +123,6 @@ func Add(userdata data) ([]data, error) {
 		return nil, isRollexists
 	}
 
-	//saving in memory
-	memoryAdapter, err := adapters.Init(adapters.MEMORY)
-	if err != nil {
-		return nil, err
-	}
-
 	//adding data into user struct
 	curuser := user.User{}
 	curuser.Fname = userdata["fname"].(string)
@@ -130,7 +132,7 @@ func Add(userdata data) ([]data, error) {
 	curuser.Courses = userdata["courses"].([]course.Course)
 
 	//adding user
-	err = memoryAdapter.Save(curuser)
+	err := adpt.MemoryAdapter.Save(curuser)
 	if err != nil {
 		return nil, err
 	}
@@ -142,17 +144,12 @@ func Add(userdata data) ([]data, error) {
 
 //function to display
 func Display(userdata data) ([]user.User, error) {
-	//intializing memory adapter
-	memoryAdapter, err := adapters.Init(adapters.MEMORY)
-	if err != nil {
-		return nil, err
-	}
 
 	field := userdata["field"].(string)
 	order := userdata["order"].(int)
 
 	//retriving all data
-	items, err := memoryAdapter.RetriveAll(field, order)
+	items, err := adpt.MemoryAdapter.RetriveAll(field, order)
 	if err != nil {
 		return nil, err
 	}
@@ -163,14 +160,8 @@ func Display(userdata data) ([]user.User, error) {
 func Delete(userdata data) ([]data, error) {
 	roll := userdata["rollnum"].(string)
 
-	//intializing memory adapter
-	memoryAdapter, err := adapters.Init(adapters.MEMORY)
-	if err != nil {
-		return nil, err
-	}
-
 	//deleting user
-	err = memoryAdapter.Delete("rollnum", roll)
+	err := adpt.MemoryAdapter.Delete("rollnum", roll)
 	if err != nil {
 		return nil, err
 	}
@@ -180,26 +171,15 @@ func Delete(userdata data) ([]data, error) {
 }
 
 func Save(data) ([]data, error) {
-	//intializing file adapter
-	fileadapter, err := adapters.Init(adapters.FILE)
-	if err != nil {
-		return nil, err
-	}
-
-	//intializing memory adapter
-	memoryadapter, err := adapters.Init(adapters.MEMORY)
-	if err != nil {
-		return nil, err
-	}
 
 	//retirving all by name
-	alldata, err := memoryadapter.RetriveAll("name", 1)
+	alldata, err := adpt.MemoryAdapter.RetriveAll("name", 1)
 	if err != nil {
 		return nil, err
 	}
 
 	//saving on disk
-	err = fileadapter.Save(alldata)
+	err = adpt.FileAdapter.Save(alldata)
 	if err != nil {
 		return nil, err
 	}
