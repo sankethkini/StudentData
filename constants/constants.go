@@ -1,6 +1,8 @@
 package constants
 
-import "github.com/sankethkini/StudentData/domain/course"
+import (
+	"github.com/sankethkini/StudentData/domain/course"
+)
 
 var AllCourses = []course.Course{
 	{
@@ -30,4 +32,4 @@ var AllCourses = []course.Course{
 }
 
 const NoOfCourses int = 4
-const Filelocation = "/Users/sanketh/coding/StudentData/savedfiles/data.json"
+const Filelocation = "data.json"

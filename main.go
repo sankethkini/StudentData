@@ -1,7 +1,10 @@
 package main
 
-import "github.com/sankethkini/StudentData/UI"
+import (
+	"github.com/sankethkini/StudentData/ui"
+)
 
 func main() {
-	UI.Start()
+
+	ui.Start()
 }
