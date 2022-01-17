@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/sankethkini/StudentData/adapter/memory"
 	"github.com/sankethkini/StudentData/constants"
 	"github.com/sankethkini/StudentData/domain/user"
 )
@@ -173,7 +172,5 @@ func TestForDelete(t *testing.T) {
 	msg, err = Delete(mp)
 	if err == nil {
 		t.Error("record is not deleted properly")
-	} else if err != memory.RecordNotFound {
-		t.Error("not a proper error message", msg)
 	}
 }

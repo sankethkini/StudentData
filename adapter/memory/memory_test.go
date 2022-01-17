@@ -125,7 +125,5 @@ func TestDelete(t *testing.T) {
 	err = adpt.Delete("rollnum", "44p")
 	if err == nil {
 		t.Error("record is not deleted properly")
-	} else if err != RecordNotFound {
-		t.Error("not a proper error message")
 	}
 }
