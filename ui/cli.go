@@ -186,7 +186,7 @@ func deleteUser() {
 //cli for save
 func saveUser() {
 	//calling save functiom
-	msg, err := application.Save(nil)
+	msg, err := application.Save()
 
 	//displaying message
 	if err != nil {
@@ -200,15 +200,18 @@ func saveUser() {
 
 //cli for exit
 func exit() {
-	fmt.Println("exiting ..... ")
-	msg, err := application.Exit(nil)
-	if err != nil {
-		fmt.Println(err)
+	fmt.Println("do you want to save the users [y/n]")
+	var ch string
+	fmt.Scanf("%s", &ch)
+	if ch == "y" {
+		saveUser()
+	} else if ch == "n" {
+		fmt.Println("exiting program without saving user")
 	} else {
-		for _, val := range msg {
-			fmt.Println(val["message"])
-		}
+		exit()
 	}
+	fmt.Println("exiting .... ")
+	application.Exit()
 }
 
 //taking menu option from user
