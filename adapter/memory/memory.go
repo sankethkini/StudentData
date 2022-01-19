@@ -89,9 +89,7 @@ func (adpt *adapter) Save(item ...user.User) error {
 	if len(item) == 1 {
 		adpt.insertUser(item[0])
 	} else {
-		for _, val := range item {
-			adpt.Items = append(adpt.Items, val)
-		}
+		adpt.Items = append(adpt.Items, item...)
 		adpt.arraysort()
 	}
 

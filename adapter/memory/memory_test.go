@@ -278,7 +278,7 @@ func TestRetrive(t *testing.T) {
 	mem, _ := NewMemory()
 	for _, val := range tests {
 		u := user.NewUser(val.fname, val.age, val.adress, val.rollnum, nil)
-		mem.Save(u)
+		_ = mem.Save(u)
 		got := mem.Retrive("rollnum", val.rollnum)
 		if got != val.res {
 			t.Errorf("exp: %v got %v", val.res, got)
