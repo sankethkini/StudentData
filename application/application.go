@@ -50,7 +50,7 @@ func fileToMemory() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	err = adpt.MemoryAdapter.Save(users)
+	err = adpt.MemoryAdapter.Save(users...)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -67,29 +67,29 @@ func createMessage(m string) []data {
 }
 
 //validators of input
-func inputValidator(userdata data) error {
+func inputValidator(userData data) error {
 
 	//checking name
-	curname := userdata["fname"].(string)
-	if len(curname) < 2 {
+	curName := userData["fname"].(string)
+	if len(curName) < 2 {
 		return NoNameErr
 	}
 
 	//checking rollnumber
-	curroll := userdata["rollnum"].(string)
-	if len(curroll) < 2 {
-		return NoRollNum
+	curRoll := userData["rollnum"].(string)
+	if len(curRoll) < 2 {
+		return NoRollNumErr
 	}
 
 	//checking address
-	curadd := userdata["address"].(string)
-	if len(curadd) < 2 {
-		return NoAddress
+	curAdd := userData["address"].(string)
+	if len(curAdd) < 2 {
+		return NoAddressErr
 	}
 
 	//checking age
-	curage := userdata["age"].(int)
-	if curage <= 0 || curage >= 120 {
+	curAge := userData["age"].(int)
+	if curAge <= 0 || curAge >= 120 {
 		return AgeErr
 	}
 
@@ -102,7 +102,7 @@ func checkForRoll(rollnum string) error {
 	//checking existence of simialr rollnum
 	isExists := adpt.MemoryAdapter.Retrive("rollnum", rollnum)
 	if isExists {
-		return RollExists
+		return RollExistsErr
 	}
 	return nil
 }
@@ -111,28 +111,23 @@ func checkForRoll(rollnum string) error {
 func Add(userdata data) ([]data, error) {
 
 	//checking validity of user input
-	validationerr := inputValidator(userdata)
-	if validationerr != nil {
-		return nil, validationerr
+	validationErr := inputValidator(userdata)
+	if validationErr != nil {
+		return nil, validationErr
 	}
 
 	//checking for rollnum existence
-	rollnum := userdata["rollnum"].(string)
-	isRollexists := checkForRoll(rollnum)
+	rollNum := userdata["rollnum"].(string)
+	isRollexists := checkForRoll(rollNum)
 	if isRollexists != nil {
 		return nil, isRollexists
 	}
 
 	//adding data into user struct
-	curuser := user.User{}
-	curuser.Fname = userdata["fname"].(string)
-	curuser.RollNo = userdata["rollnum"].(string)
-	curuser.Age = userdata["age"].(int)
-	curuser.Adress = userdata["address"].(string)
-	curuser.Courses = userdata["courses"].([]course.Course)
+	curUser := user.NewUser(userdata["fname"].(string), userdata["age"].(int), userdata["address"].(string), userdata["rollnum"].(string), userdata["courses"].([]course.Course))
 
 	//adding user
-	err := adpt.MemoryAdapter.Save(curuser)
+	err := adpt.MemoryAdapter.Save(curUser)
 	if err != nil {
 		return nil, err
 	}
@@ -143,22 +138,22 @@ func Add(userdata data) ([]data, error) {
 }
 
 //function to display
-func Display(userdata data) ([]user.User, error) {
+func Display(userData data) ([]user.User, error) {
 
-	field := userdata["field"].(string)
-	order := userdata["order"].(int)
+	field := userData["field"].(string)
+	order := userData["order"].(int)
 
 	//retriving all data
 	items, err := adpt.MemoryAdapter.RetriveAll(field, order)
 	if err != nil {
 		return nil, err
 	}
-	allitems := items.([]user.User)
-	return allitems, nil
+
+	return items, nil
 }
 
-func Delete(userdata data) ([]data, error) {
-	roll := userdata["rollnum"].(string)
+func Delete(userData data) ([]data, error) {
+	roll := userData["rollnum"].(string)
 
 	//deleting user
 	err := adpt.MemoryAdapter.Delete("rollnum", roll)
@@ -170,16 +165,16 @@ func Delete(userdata data) ([]data, error) {
 	return msg, err
 }
 
-func Save(data) ([]data, error) {
+func Save() ([]data, error) {
 
 	//retirving all by name
-	alldata, err := adpt.MemoryAdapter.RetriveAll("name", 1)
+	allData, err := adpt.MemoryAdapter.RetriveAll("name", 1)
 	if err != nil {
 		return nil, err
 	}
 
 	//saving on disk
-	err = adpt.FileAdapter.Save(alldata)
+	err = adpt.FileAdapter.Save(allData)
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +184,7 @@ func Save(data) ([]data, error) {
 }
 
 //exit function
-func Exit(data) ([]data, error) {
+func Exit() {
 	os.Exit(1)
-	return nil, nil
+
 }

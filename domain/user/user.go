@@ -9,3 +9,13 @@ type User struct {
 	RollNo  string
 	Courses []course.Course
 }
+
+func NewUser(Fname string, Age int, Adress string, RollNo string, Courses []course.Course) User {
+	curUser := User{}
+	curUser.Fname = Fname
+	curUser.RollNo = RollNo
+	curUser.Age = Age
+	curUser.Adress = Adress
+	curUser.Courses = Courses
+	return curUser
+}
