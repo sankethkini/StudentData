@@ -16,12 +16,13 @@ type adapter struct {
 
 //checking if file exists
 func checkFileExists(filename string) bool {
-	_, err := os.Stat(constants.Filelocation)
+	_, err := os.Stat(filename)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return false
 		}
 	}
+
 	return true
 }
 
@@ -37,63 +38,73 @@ func removeAndCreateFile() (*os.File, error) {
 	}
 
 	//creating file.json
-	fileinfo, err := os.Create(constants.Filelocation)
+	file, err := os.Create(constants.Filelocation)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create file %w", err)
 	}
-	return fileinfo, nil
+
+	return file, nil
+
 }
 
 //saving into disk
 //convering into json and saving into file.json
-func (file *adapter) Save(items interface{}) error {
+func (file *adapter) Save(items []user.User) error {
 	//marshleing record into json
-	curItems := items.([]user.User)
-	jsondata, err := json.Marshal(curItems)
+
+	jsonData, err := json.Marshal(items)
 	if err != nil {
 		return fmt.Errorf("error in json marshal %w", err)
 	}
 
 	//take file pointer
-	fileinfo, err := removeAndCreateFile()
+	fileInfo, err := removeAndCreateFile()
 	if err != nil {
 		return err
 	}
-
-	defer fileinfo.Close()
-
+	defer fileInfo.Close()
 	//write into file
-	_, err = fileinfo.Write(jsondata)
+	_, err = fileInfo.Write(jsonData)
 	if err != nil {
 		return fmt.Errorf("cannot write on file %w", err)
 	}
 	return nil
 }
 
-//retriving from file.json
-//unmarsheling into user struct
-func (file *adapter) RetriveAll() (interface{}, error) {
-	//check for file existence
-	if !checkFileExists(constants.Filelocation) {
-		//else create file
-		fileinfo, err := removeAndCreateFile()
-		if err != nil {
-			return nil, err
-		}
-		fileinfo.Close()
-	}
-
-	fileinfo, err := os.Open(constants.Filelocation)
+func openFile(filename string) (*os.File, error) {
+	file, err := os.Open(constants.Filelocation)
 	if err != nil {
 		return nil, fmt.Errorf("cannot open the file %w", err)
 	}
-	defer fileinfo.Close()
+	return file, nil
 
-	data, err := ioutil.ReadAll(fileinfo)
+}
+
+//retriving from file.json
+//unmarsheling into user struct
+func (file *adapter) RetriveAll() ([]user.User, error) {
+	//check for file existence
+	if !checkFileExists(constants.Filelocation) {
+		//else create file
+		_, err := removeAndCreateFile()
+		if err != nil {
+			return nil, err
+		}
+
+	}
+
+	fi, err := openFile(constants.Filelocation)
+	if err != nil {
+		return nil, err
+	}
+	defer fi.Close()
+
+	data, err := ioutil.ReadAll(fi)
 	if len(data) == 0 {
 		var dataret []user.User
 		return dataret, nil
 	}
+
 	if err != nil {
 		return nil, fmt.Errorf("cannot read the file %w", err)
 	}

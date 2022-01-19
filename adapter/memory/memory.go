@@ -84,17 +84,15 @@ func (adpt *adapter) arraysort() {
 //save function
 //insertion sort for single entry
 //arraysorting if more than one record entry
-func (adpt *adapter) Save(item interface{}) error {
+func (adpt *adapter) Save(item ...user.User) error {
 
-	switch item := item.(type) {
-
-	case user.User:
-		adpt.insertUser(item)
-	case []user.User:
-		adpt.Items = append(adpt.Items, item...)
+	if len(item) == 1 {
+		adpt.insertUser(item[0])
+	} else {
+		for _, val := range item {
+			adpt.Items = append(adpt.Items, val)
+		}
 		adpt.arraysort()
-	default:
-		return fmt.Errorf("error while saving records %w", NotARightType)
 	}
 
 	return nil
@@ -109,7 +107,7 @@ func reverse(arr []user.User) {
 
 //RetriveAll function to retrive all records
 //sorting based on field
-func (adpt *adapter) RetriveAll(field string, order int) (interface{}, error) {
+func (adpt *adapter) RetriveAll(field string, order int) ([]user.User, error) {
 
 	var allusers []user.User
 	allusers = append(allusers, adpt.Items...)
@@ -155,7 +153,7 @@ func (adpt *adapter) RetriveAll(field string, order int) (interface{}, error) {
 
 func (adpt *adapter) Delete(field string, value string) error {
 	if !adpt.mapper[value] {
-		return fmt.Errorf("cannot delete the record %w", RecordNotFound)
+		return fmt.Errorf("cannot delete the record %w", RecordNotFoundErr)
 	} else {
 
 		index := -1
@@ -164,7 +162,9 @@ func (adpt *adapter) Delete(field string, value string) error {
 				index = i
 			}
 		}
-		if index == len(adpt.Items)-1 {
+		if len(adpt.Items) == 1 {
+			adpt.Items = []user.User{}
+		} else if index == len(adpt.Items)-1 {
 			adpt.Items = adpt.Items[:index-1]
 		} else {
 			adpt.Items = append(adpt.Items[:index], adpt.Items[index+1:]...)

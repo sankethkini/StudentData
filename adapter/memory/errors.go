@@ -2,5 +2,7 @@ package memory
 
 import "errors"
 
-var RecordNotFound = errors.New("record not found")
-var NotARightType = errors.New("not a right type")
+var (
+	RecordNotFoundErr = errors.New("record not found")
+	NotARightTypeErr  = errors.New("not a right type")
+)

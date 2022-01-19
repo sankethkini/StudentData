@@ -42,7 +42,7 @@ var tests = []user.User{
 
 func TestSaveAndRetrive(t *testing.T) {
 
-	adapter := adapter{}
+	adapter, _ := NewFileAdapter()
 	err := adapter.Save(tests)
 	if err != nil {
 		t.Error(err)
@@ -56,9 +56,8 @@ func TestSaveAndRetrive(t *testing.T) {
 		t.Errorf("not of right type %v", reflect.TypeOf(data))
 	}
 
-	curdata := data.([]user.User)
 	for i, val := range tests {
-		if curdata[i].RollNo != tests[i].RollNo {
+		if data[i].RollNo != tests[i].RollNo {
 			t.Errorf("records not mathcing %v and %v", val, data)
 		}
 	}
