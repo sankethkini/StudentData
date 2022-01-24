@@ -2,10 +2,10 @@ package file
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 
+	"github.com/pkg/errors"
 	"github.com/sankethkini/StudentData/constants"
 	"github.com/sankethkini/StudentData/domain/user"
 )
@@ -33,14 +33,14 @@ func removeAndCreateFile() (*os.File, error) {
 	if exi {
 		err := os.Remove(constants.Filelocation)
 		if err != nil {
-			return nil, fmt.Errorf("cannot remove file %w", err)
+			return nil, errors.Wrap(err, "cannot remove file")
 		}
 	}
 
 	//creating file.json
 	file, err := os.Create(constants.Filelocation)
 	if err != nil {
-		return nil, fmt.Errorf("cannot create file %w", err)
+		return nil, errors.Wrap(err, "cannot create the file")
 	}
 
 	return file, nil
@@ -54,7 +54,7 @@ func (file *adapter) Save(items []user.User) error {
 
 	jsonData, err := json.Marshal(items)
 	if err != nil {
-		return fmt.Errorf("error in json marshal %w", err)
+		return errors.Wrap(err, "error in json marshal")
 	}
 
 	//take file pointer
@@ -66,7 +66,7 @@ func (file *adapter) Save(items []user.User) error {
 	//write into file
 	_, err = fileInfo.Write(jsonData)
 	if err != nil {
-		return fmt.Errorf("cannot write on file %w", err)
+		return errors.Wrap(err, "cannot write on files")
 	}
 	return nil
 }
@@ -74,7 +74,7 @@ func (file *adapter) Save(items []user.User) error {
 func openFile(filename string) (*os.File, error) {
 	file, err := os.Open(constants.Filelocation)
 	if err != nil {
-		return nil, fmt.Errorf("cannot open the file %w", err)
+		return nil, errors.Wrap(err, "cannot open the file")
 	}
 	return file, nil
 
@@ -106,13 +106,13 @@ func (file *adapter) RetriveAll() ([]user.User, error) {
 	}
 
 	if err != nil {
-		return nil, fmt.Errorf("cannot read the file %w", err)
+		return nil, errors.Wrap(err, "cannot read file")
 	}
 
 	var dataret []user.User
 	err = json.Unmarshal(data, &dataret)
 	if err != nil {
-		return nil, fmt.Errorf("cannot unmarsh the contents of the file %w", err)
+		return nil, errors.Wrap(err, "cannot unmarshal file")
 	}
 
 	return dataret, nil

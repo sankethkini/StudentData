@@ -43,12 +43,16 @@ var tests = []user.User{
 func TestSaveAndRetrive(t *testing.T) {
 
 	adapter, _ := NewFileAdapter()
+	data, er := adapter.RetriveAll()
+	if er != nil {
+		t.Error(er)
+	}
 	err := adapter.Save(tests)
 	if err != nil {
 		t.Error(err)
 	}
 
-	data, err := adapter.RetriveAll()
+	data, err = adapter.RetriveAll()
 	if err != nil {
 		t.Error(err)
 	}

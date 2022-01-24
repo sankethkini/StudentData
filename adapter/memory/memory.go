@@ -1,9 +1,9 @@
 package memory
 
 import (
-	"fmt"
 	"sort"
 
+	"github.com/pkg/errors"
 	"github.com/sankethkini/StudentData/domain/user"
 )
 
@@ -151,7 +151,7 @@ func (adpt *adapter) RetriveAll(field string, order int) ([]user.User, error) {
 
 func (adpt *adapter) Delete(field string, value string) error {
 	if !adpt.mapper[value] {
-		return fmt.Errorf("cannot delete the record %w", RecordNotFoundErr)
+		return errors.Wrap(RecordNotFoundErr, "cannot delete the record")
 	} else {
 
 		index := -1

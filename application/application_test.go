@@ -13,33 +13,11 @@ var testForValidator = []struct {
 	rollnum  string
 	adress   string
 	age      int
-	expected error
+	expected bool
 }{
-	{fname: "sanket", rollnum: "t77", adress: "abcd, defgh, jiop", age: 17, expected: nil},
-	{fname: "", rollnum: "t77", adress: "abcd, defgh, jiop", age: 18, expected: NoNameErr},
-	{fname: "sanket1", rollnum: "", adress: "", age: 18, expected: NoRollNumErr},
-	{fname: "sanket2", rollnum: "t77", adress: "abcd, defgh, jiop", age: 0, expected: AgeErr},
-	{fname: "sanket3", rollnum: "t77", adress: "abcd, defgh, jiop", age: -18, expected: AgeErr},
-	{fname: "sanket4", rollnum: "t78", adress: "abcd, defgh, jiop", age: 18, expected: nil},
-	{fname: "sanket22", rollnum: "t79", adress: "abcd, defgh, jiop", age: 16, expected: nil},
-	{fname: "sanket4", rollnum: "t788", adress: "", age: 18, expected: NoAddressErr},
-}
-
-//testing validators
-func TestDataValidator(t *testing.T) {
-
-	for _, val := range testForValidator {
-		userdata := make(map[string]interface{})
-		userdata["fname"] = val.fname
-		userdata["rollnum"] = val.rollnum
-		userdata["address"] = val.adress
-		userdata["age"] = val.age
-
-		err := inputValidator(userdata)
-		if err != val.expected {
-			t.Errorf("error in validation exp:%v got: %v", val.expected, err)
-		}
-	}
+	{fname: "sanket", rollnum: "t77", adress: "abcd, defgh, jiop", age: 17, expected: false},
+	{fname: "", rollnum: "t77", adress: "abcd, defgh, jiop", age: 17, expected: true},
+	{fname: "sanket3", rollnum: "t77", adress: "abcd, defgh, jiop", age: 18, expected: true},
 }
 
 //testing add function
@@ -47,18 +25,14 @@ func TestAdd(t *testing.T) {
 
 	for _, val := range testForValidator {
 
-		userdata := make(map[string]interface{})
-		userdata["fname"] = val.fname
-		userdata["rollnum"] = val.rollnum
-		userdata["address"] = val.adress
-		userdata["age"] = val.age
-		userdata["courses"] = constants.AllCourses[:4]
+		usr := user.NewUser(val.fname, val.age, val.adress, val.rollnum, constants.AllCourses[:4])
 
-		_, err := Add(userdata)
-		if err != nil {
-			if err != val.expected {
-				t.Errorf("error in adding exp:%v got %v", val.expected, err)
-			}
+		_, err := Add(usr)
+		if val.expected == false && err != nil {
+			t.Errorf("got unexpected error got %v", err)
+		}
+		if val.expected == true && err == nil {
+			t.Errorf("didn't get any error got %v", err)
 		}
 
 	}
@@ -112,14 +86,9 @@ func TestDisplay(t *testing.T) {
 
 	for i, val := range testsForDisplay {
 
-		userdata := make(map[string]interface{})
-		userdata["fname"] = val.fname
-		userdata["rollnum"] = val.rollnum
-		userdata["address"] = val.adress
-		userdata["age"] = val.age
-		userdata["courses"] = constants.AllCourses[:4]
+		usr := user.NewUser(val.fname, val.age, val.adress, val.rollnum, constants.AllCourses[:4])
 
-		data, err := Add(userdata)
+		data, err := Add(usr)
 		if err != nil {
 			t.Error(2, i, err, data)
 		}

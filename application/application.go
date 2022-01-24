@@ -7,7 +7,6 @@ import (
 	"github.com/sankethkini/StudentData/adapter"
 	"github.com/sankethkini/StudentData/adapter/file"
 	"github.com/sankethkini/StudentData/adapter/memory"
-	"github.com/sankethkini/StudentData/domain/course"
 	"github.com/sankethkini/StudentData/domain/user"
 )
 
@@ -66,36 +65,6 @@ func createMessage(m string) []data {
 	return msg
 }
 
-//validators of input
-func inputValidator(userData data) error {
-
-	//checking name
-	curName := userData["fname"].(string)
-	if len(curName) < 2 {
-		return NoNameErr
-	}
-
-	//checking rollnumber
-	curRoll := userData["rollnum"].(string)
-	if len(curRoll) < 2 {
-		return NoRollNumErr
-	}
-
-	//checking address
-	curAdd := userData["address"].(string)
-	if len(curAdd) < 2 {
-		return NoAddressErr
-	}
-
-	//checking age
-	curAge := userData["age"].(int)
-	if curAge <= 0 || curAge >= 120 {
-		return AgeErr
-	}
-
-	return nil
-}
-
 //validations for rollnumber exists
 func checkForRoll(rollnum string) error {
 
@@ -108,26 +77,22 @@ func checkForRoll(rollnum string) error {
 }
 
 //function to add user
-func Add(userdata data) ([]data, error) {
+func Add(user user.User) ([]data, error) {
 
 	//checking validity of user input
-	validationErr := inputValidator(userdata)
+	validationErr := user.Validate()
 	if validationErr != nil {
 		return nil, validationErr
 	}
 
 	//checking for rollnum existence
-	rollNum := userdata["rollnum"].(string)
-	isRollexists := checkForRoll(rollNum)
+	isRollexists := checkForRoll(user.RollNo)
 	if isRollexists != nil {
-		return nil, isRollexists
+		return nil, RollExistsErr
 	}
 
-	//adding data into user struct
-	curUser := user.NewUser(userdata["fname"].(string), userdata["age"].(int), userdata["address"].(string), userdata["rollnum"].(string), userdata["courses"].([]course.Course))
-
 	//adding user
-	err := adpt.MemoryAdapter.Save(curUser)
+	err := adpt.MemoryAdapter.Save(user)
 	if err != nil {
 		return nil, err
 	}
