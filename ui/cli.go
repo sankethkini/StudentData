@@ -8,6 +8,7 @@ import (
 	"github.com/sankethkini/StudentData/application"
 	"github.com/sankethkini/StudentData/constants"
 	"github.com/sankethkini/StudentData/domain/course"
+	"github.com/sankethkini/StudentData/domain/user"
 )
 
 //function to print menu for user
@@ -87,15 +88,10 @@ func addUser() {
 	//taking course input from user
 	selectedCourse := takeCourseInput()
 
-	userdata := make(map[string]interface{})
-	userdata["fname"] = fname
-	userdata["rollnum"] = rollnum
-	userdata["address"] = address
-	userdata["age"] = age
-	userdata["courses"] = selectedCourse
+	user := user.NewUser(fname, age, address, rollnum, selectedCourse)
 
 	//adding user
-	res, err := application.Add(userdata)
+	res, err := application.Add(user)
 	if err != nil {
 		fmt.Println(err)
 
@@ -136,7 +132,7 @@ func takeDisplayInput() map[string]interface{} {
 		data["field"] = "address"
 	default:
 		data["field"] = "name"
-		fmt.Println("Enter the valid number")
+
 	}
 
 	return data
@@ -205,10 +201,8 @@ func exit() {
 	fmt.Scanf("%s", &ch)
 	if ch == "y" {
 		saveUser()
-	} else if ch == "n" {
-		fmt.Println("exiting program without saving user")
 	} else {
-		exit()
+		fmt.Println("exiting program without saving user")
 	}
 	fmt.Println("exiting .... ")
 	application.Exit()
