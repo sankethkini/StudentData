@@ -48,14 +48,6 @@ var singleTest = user.User{
 	Courses: nil,
 }
 
-var singleTest1 = user.User{
-	Fname:   "amr",
-	RollNo:  "ka32",
-	Age:     13,
-	Address: "2 sad 232 ",
-	Courses: nil,
-}
-
 var singleTest2 = user.User{
 	Fname:   "kmr",
 	RollNo:  "ka33",
@@ -96,10 +88,7 @@ func addSingles(adpt *Adapter) error {
 	if err != nil {
 		return err
 	}
-	err = adpt.Save(singleTest1)
-	if err != nil {
-		return err
-	}
+
 	err = adpt.Save(singleTest)
 	if err != nil {
 		return err
