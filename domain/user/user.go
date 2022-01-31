@@ -8,18 +8,18 @@ import (
 type User struct {
 	Fname   string
 	Age     int
-	Adress  string
+	Address string
 	RollNo  string
 	Courses []course.Course
 }
 
-func NewUser(Fname string, Age int, Adress string, RollNo string, Courses []course.Course) User {
+func NewUser(fname string, age int, address string, rollNo string, courses []course.Course) User {
 	curUser := User{}
-	curUser.Fname = Fname
-	curUser.RollNo = RollNo
-	curUser.Age = Age
-	curUser.Adress = Adress
-	curUser.Courses = Courses
+	curUser.Fname = fname
+	curUser.RollNo = rollNo
+	curUser.Age = age
+	curUser.Address = address
+	curUser.Courses = courses
 	return curUser
 }
 
@@ -27,7 +27,7 @@ func (user User) Validate() error {
 	return validation.ValidateStruct(&user,
 		validation.Field(&user.Fname, validation.Required, validation.Length(2, 50)),
 		validation.Field(&user.Age, validation.Required, validation.Min(1)),
-		validation.Field(&user.Adress, validation.Required, validation.Length(3, 100)),
+		validation.Field(&user.Address, validation.Required, validation.Length(3, 100)),
 		validation.Field(&user.RollNo, validation.Length(3, 20)),
 		validation.Field(&user.Courses, validation.Required),
 	)

@@ -3,9 +3,9 @@ package application
 import "errors"
 
 var (
-	NoNameErr     = errors.New("No proper name provided")
-	AgeErr        = errors.New("Not a valid age")
-	NoAddressErr  = errors.New("No proper address provided")
-	NoRollNumErr  = errors.New("No proper rollnumber provided")
-	RollExistsErr = errors.New("Roll number already exists")
+	ErrNoName     = errors.New("no proper name provided")
+	ErrAge        = errors.New("not a valid age")
+	ErrNoAddress  = errors.New("no proper address provided")
+	ErrNoRollNum  = errors.New("no proper rollnumber provided")
+	ErrRollExists = errors.New("roll number already exists")
 )

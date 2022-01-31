@@ -31,5 +31,7 @@ var AllCourses = []course.Course{
 	},
 }
 
-const NoOfCourses int = 4
-const Filelocation = "data.json"
+const (
+	NoOfCourses  int = 4
+	Filelocation     = "data.json"
+)

@@ -11,7 +11,33 @@ import (
 	"github.com/sankethkini/StudentData/domain/user"
 )
 
-//function to print menu for user
+// Start function takes menu option from user.
+func Start() {
+	MyApp, err := application.NewApp()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	for {
+		printMenu()
+		var option int
+		fmt.Scanf("%d", &option)
+		switch option {
+		case 1:
+			addUser(MyApp)
+		case 2:
+			displayUser(MyApp)
+		case 3:
+			deleteUser(MyApp)
+		case 4:
+			saveUser(MyApp)
+		case 5:
+			exit(MyApp)
+		}
+	}
+}
+
+// function to print menu for user.
 func printMenu() {
 	fmt.Println("Choose options:")
 	fmt.Println("1. Add user details")
@@ -21,29 +47,27 @@ func printMenu() {
 	fmt.Println("5. Exit")
 }
 
-//cli func for taking course input from user
+// cli func for taking course input from user.
 func takeCourseInput() []course.Course {
-
 	var selectedCourse []course.Course
 	fmt.Println("enter", constants.NoOfCourses, "course")
 	for i, val := range constants.AllCourses {
 		fmt.Printf(" | %d.  course code: %s    coursename: %s | ", i, val.Code, val.Name)
 	}
 
-	//taking input till all courses are entered properly
+	// taking input till all courses are entered properly.
 	for i := 1; i <= constants.NoOfCourses; {
 		fmt.Printf("\nchoose course number %d", i)
 		var code int
 		fmt.Scanf("%d", &code)
 
-		//check for proper code
+		// check for proper code.
 		if code < 0 || code >= len(constants.AllCourses) {
 			fmt.Println("Enter the proper code")
 			continue
 		} else {
-
-			//checking if course is already seleceted
-			var selected bool = false
+			// checking if course is already seleceted.
+			selected := false
 			for j := 0; j < len(selectedCourse); j++ {
 				if constants.AllCourses[code].Code == selectedCourse[j].Code {
 					fmt.Println("course already selected")
@@ -54,7 +78,7 @@ func takeCourseInput() []course.Course {
 				continue
 			}
 
-			//appending course to the list
+			// appending course to the list.
 			selectedCourse = append(selectedCourse, constants.AllCourses[code])
 		}
 		i++
@@ -62,9 +86,8 @@ func takeCourseInput() []course.Course {
 	return selectedCourse
 }
 
-//userDataInput takes user realted info
+// userDataInput takes user realted info.
 func userDataInput() (fname string, address string, rollnum string, age int) {
-
 	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Println("Enter the full name")
 	scanner.Scan()
@@ -79,33 +102,31 @@ func userDataInput() (fname string, address string, rollnum string, age int) {
 	return
 }
 
-//cli function for user to add new user
-func addUser() {
+// cli function for user to add new user.
+func addUser(app *application.App) {
+	// user data.
+	fname, address, rollNum, age := userDataInput()
 
-	//user data
-	fname, address, rollnum, age := userDataInput()
-
-	//taking course input from user
+	// taking course input from user.
 	selectedCourse := takeCourseInput()
 
-	user := user.NewUser(fname, age, address, rollnum, selectedCourse)
+	user := user.NewUser(fname, age, address, rollNum, selectedCourse)
 
-	//adding user
-	res, err := application.Add(user)
+	// adding user.
+	res, err := app.Add(user)
 	if err != nil {
 		fmt.Println(err)
-
 	} else {
-		//display msg from application
+		// display msg from application.
 		for _, val := range res {
 			fmt.Println(val["message"])
 		}
 	}
 }
 
-//takeDisplayInput function takes input from user required to display all users according to preference
+// takeDisplayInput function takes input from user required to display all users according to preference.
 func takeDisplayInput() map[string]interface{} {
-	//options to user
+	// options to user.
 	fmt.Println("Enter the field you want to sort by")
 	fmt.Println("1. Name")
 	fmt.Println("2. RollNumber")
@@ -132,33 +153,31 @@ func takeDisplayInput() map[string]interface{} {
 		data["field"] = "address"
 	default:
 		data["field"] = "name"
-
 	}
 
 	return data
 }
 
-//cli func for display users
-func displayUser() {
-
+// cli func for display users.
+func displayUser(app *application.App) {
 	data := takeDisplayInput()
 
-	//displaying data from application
-	users, err := application.Display(data)
+	// displaying data from application.
+	users, err := app.Display(data)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	} else {
 		for _, val := range users {
-			fmt.Printf("Name: %v Rollnum: %v Address: %v Age:%v\n", val.Fname, val.RollNo, val.Adress, val.Age)
+			fmt.Printf("Name: %v Rollnum: %v Address: %v Age:%v\n", val.Fname, val.RollNo, val.Address, val.Age)
 			fmt.Printf(" | Course 1: %s Course 2: %s Course 3: %s Course 3:%s | \n", val.Courses[0].Code, val.Courses[1].Code, val.Courses[2].Code, val.Courses[3].Code)
 		}
 	}
 }
 
-//cli func for delete users
-func deleteUser() {
-	//taking input from user
+// cli func for delete users.
+func deleteUser(app *application.App) {
+	// taking input from user.
 	fmt.Println("Enter user rollnumber ")
 	var roll string
 	fmt.Scanf("%s", &roll)
@@ -166,10 +185,10 @@ func deleteUser() {
 	data := make(map[string]interface{})
 	data["rollnum"] = roll
 
-	//calling delete from app
-	msg, err := application.Delete(data)
+	// calling delete from app.
+	msg, err := app.Delete(data)
 
-	//displaying message
+	// displaying message.
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -179,12 +198,12 @@ func deleteUser() {
 	}
 }
 
-//cli for save
-func saveUser() {
-	//calling save functiom
-	msg, err := application.Save()
+// cli for save.
+func saveUser(app *application.App) {
+	// calling save function.
+	msg, err := app.Save()
 
-	//displaying message
+	// displaying message.
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -194,39 +213,16 @@ func saveUser() {
 	}
 }
 
-//cli for exit
-func exit() {
+// cli for exit.
+func exit(app *application.App) {
 	fmt.Println("do you want to save the users [y/n]")
 	var ch string
 	fmt.Scanf("%s", &ch)
 	if ch == "y" {
-		saveUser()
+		saveUser(app)
 	} else {
 		fmt.Println("exiting program without saving user")
 	}
 	fmt.Println("exiting .... ")
-	application.Exit()
-}
-
-//taking menu option from user
-func Start() {
-	for {
-		printMenu()
-		var option int
-		fmt.Scanf("%d", &option)
-		switch option {
-		case 1:
-			addUser()
-		case 2:
-			displayUser()
-		case 3:
-			deleteUser()
-		case 4:
-			saveUser()
-		case 5:
-			exit()
-		}
-
-	}
-
+	app.Exit()
 }

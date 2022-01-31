@@ -10,106 +10,100 @@ import (
 	"github.com/sankethkini/StudentData/domain/user"
 )
 
-//alisaing map
-type data map[string]interface{}
+// alisaing map.
+type Data map[string]interface{}
 
-//global access
-var adpt *adapter.Adapter
+type IApp interface {
+	Add(user.User) ([]Data, error)
+	Display(Data) ([]Data, error)
+	Delete(Data) ([]Data, error)
+	Save() ([]Data, error)
+	Exit()
+}
 
-//init function called one time
-func init() {
+type App struct {
+	adpt *adapter.Adapter
+}
 
-	//intializing file adapter
+func NewApp() (*App, error) {
+	// intializing file Adapter.
 	fileAdapter, err := file.NewFileAdapter()
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return nil, err
 	}
 
-	//intializing memory adapter
+	// intializing memory Adapter.
 	memoryAdapter, err := memory.NewMemory()
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return nil, err
 	}
 
-	//intializing adapter
-	adpt, err = adapter.NewAdapter(fileAdapter, memoryAdapter)
+	// intializing Adapter.
+	adpt, err := adapter.NewAdapter(fileAdapter, memoryAdapter)
+	if err != nil {
+		return nil, err
+	}
+
+	app := App{adpt: adpt}
+	app.fileToMemory()
+	return &app, nil
+}
+
+func (app *App) fileToMemory() {
+	users, err := app.adpt.FileAdapter.RetriveAll()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-
-	fileToMemory()
-}
-
-func fileToMemory() {
-	users, err := adpt.FileAdapter.RetriveAll()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	err = adpt.MemoryAdapter.Save(users...)
+	err = app.adpt.MemoryAdapter.Save(users...)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 }
 
-//function to return message
-func createMessage(m string) []data {
-	var msg []data
-	mp := make(map[string]interface{})
-	mp["message"] = m
-	msg = append(msg, mp)
-	return msg
-}
-
-//validations for rollnumber exists
-func checkForRoll(rollnum string) error {
-
-	//checking existence of simialr rollnum
-	isExists := adpt.MemoryAdapter.Retrive("rollnum", rollnum)
-	if isExists {
-		return RollExistsErr
-	}
-	return nil
-}
-
-//function to add user
-func Add(user user.User) ([]data, error) {
-
-	//checking validity of user input
+// function to add user.
+func (app *App) Add(user user.User) ([]Data, error) {
+	// checking validity of user input.
 	validationErr := user.Validate()
 	if validationErr != nil {
 		return nil, validationErr
 	}
 
-	//checking for rollnum existence
-	isRollexists := checkForRoll(user.RollNo)
+	// checking for rollnum existence.
+	isRollexists := app.checkForRoll(user.RollNo)
 	if isRollexists != nil {
-		return nil, RollExistsErr
+		return nil, ErrRollExists
 	}
 
-	//adding user
-	err := adpt.MemoryAdapter.Save(user)
+	// adding user.
+	err := app.adpt.MemoryAdapter.Save(user)
 	if err != nil {
 		return nil, err
 	}
 
-	//message
-	msg := createMessage("user added successfuly")
+	// message.
+	msg := createMessage("user added successfully")
 	return msg, err
 }
 
-//function to display
-func Display(userData data) ([]user.User, error) {
+// validations for rollnumber exists.
+func (app *App) checkForRoll(rollnum string) error {
+	// checking existence of simialr rollnum.
+	isExists := app.adpt.MemoryAdapter.Retrieve("rollnum", rollnum)
+	if isExists {
+		return ErrRollExists
+	}
+	return nil
+}
 
+// function to display.
+func (app *App) Display(userData Data) ([]user.User, error) {
 	field := userData["field"].(string)
 	order := userData["order"].(int)
 
-	//retriving all data
-	items, err := adpt.MemoryAdapter.RetriveAll(field, order)
+	// retrieving all data.
+	items, err := app.adpt.MemoryAdapter.RetriveAll(field, order)
 	if err != nil {
 		return nil, err
 	}
@@ -117,39 +111,45 @@ func Display(userData data) ([]user.User, error) {
 	return items, nil
 }
 
-func Delete(userData data) ([]data, error) {
+func (app *App) Delete(userData Data) ([]Data, error) {
 	roll := userData["rollnum"].(string)
 
-	//deleting user
-	err := adpt.MemoryAdapter.Delete("rollnum", roll)
+	// deleting user.
+	err := app.adpt.MemoryAdapter.Delete("rollnum", roll)
 	if err != nil {
 		return nil, err
 	}
 
-	msg := createMessage("user deleted successfuly")
+	msg := createMessage("user deleted successfully")
 	return msg, err
 }
 
-func Save() ([]data, error) {
-
-	//retirving all by name
-	allData, err := adpt.MemoryAdapter.RetriveAll("name", 1)
+func (app *App) Save() ([]Data, error) {
+	// retirving all by name.
+	allData, err := app.adpt.MemoryAdapter.RetriveAll("name", 1)
 	if err != nil {
 		return nil, err
 	}
 
-	//saving on disk
-	err = adpt.FileAdapter.Save(allData)
+	// saving on disk.
+	err = app.adpt.FileAdapter.Save(allData)
 	if err != nil {
 		return nil, err
 	}
-	msg := createMessage("users saved to disk successfuly")
+	msg := createMessage("users saved to disk successfully")
 	return msg, err
-
 }
 
-//exit function
-func Exit() {
+// exit function.
+func (app *App) Exit() {
 	os.Exit(1)
+}
 
+// function to return message.
+func createMessage(m string) []Data {
+	var msg []Data
+	mp := make(map[string]interface{})
+	mp["message"] = m
+	msg = append(msg, mp)
+	return msg
 }

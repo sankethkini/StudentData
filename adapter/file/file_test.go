@@ -10,16 +10,16 @@ import (
 
 var tests = []user.User{
 	{
-		Fname:  "sanket",
-		RollNo: "44s",
-		Age:    12,
-		Adress: "2 232 ",
+		Fname:   "sanket",
+		RollNo:  "44s",
+		Age:     12,
+		Address: "2 232 ",
 	},
 	{
-		Fname:  "sanket1",
-		RollNo: "44s",
-		Age:    12,
-		Adress: "2 232 ",
+		Fname:   "sanket1",
+		RollNo:  "44s",
+		Age:     12,
+		Address: "2 232 ",
 		Courses: []course.Course{
 			{
 				Name: "A",
@@ -35,15 +35,14 @@ var tests = []user.User{
 		Fname:   "sanket2",
 		RollNo:  "44s",
 		Age:     12,
-		Adress:  "2 232 ",
+		Address: "2 232 ",
 		Courses: nil,
 	},
 }
 
 func TestSaveAndRetrive(t *testing.T) {
-
 	adapter, _ := NewFileAdapter()
-	data, er := adapter.RetriveAll()
+	_, er := adapter.RetriveAll()
 	if er != nil {
 		t.Error(er)
 	}
@@ -52,7 +51,7 @@ func TestSaveAndRetrive(t *testing.T) {
 		t.Error(err)
 	}
 
-	data, err = adapter.RetriveAll()
+	data, err := adapter.RetriveAll()
 	if err != nil {
 		t.Error(err)
 	}

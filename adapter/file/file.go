@@ -10,11 +10,15 @@ import (
 	"github.com/sankethkini/StudentData/domain/user"
 )
 
-//struct for file adapter
-type adapter struct {
+// struct for file Adapter.
+type Adapter struct{}
+
+// constructor.
+func NewFileAdapter() (*Adapter, error) {
+	return &Adapter{}, nil
 }
 
-//checking if file exists
+// checking if file exists.
 func checkFileExists(filename string) bool {
 	_, err := os.Stat(filename)
 	if err != nil {
@@ -22,13 +26,12 @@ func checkFileExists(filename string) bool {
 			return false
 		}
 	}
-
 	return true
 }
 
-//removeAndCreateFile removes exisiting file and creates new file
+// removeAndCreateFile removes exisiting file and creates new file.
 func removeAndCreateFile() (*os.File, error) {
-	//removing file
+	// removing file.
 	exi := checkFileExists(constants.Filelocation)
 	if exi {
 		err := os.Remove(constants.Filelocation)
@@ -37,33 +40,32 @@ func removeAndCreateFile() (*os.File, error) {
 		}
 	}
 
-	//creating file.json
+	// creating file.json
 	file, err := os.Create(constants.Filelocation)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot create the file")
 	}
 
 	return file, nil
-
 }
 
-//saving into disk
-//convering into json and saving into file.json
-func (file *adapter) Save(items []user.User) error {
-	//marshleing record into json
+// saving into disk.
+// convering into json and saving into file.json.
+func (file *Adapter) Save(items []user.User) error {
+	// marshleing record into json.
 
 	jsonData, err := json.Marshal(items)
 	if err != nil {
 		return errors.Wrap(err, "error in json marshal")
 	}
 
-	//take file pointer
+	// take file pointer.
 	fileInfo, err := removeAndCreateFile()
 	if err != nil {
 		return err
 	}
 	defer fileInfo.Close()
-	//write into file
+	// write into file.
 	_, err = fileInfo.Write(jsonData)
 	if err != nil {
 		return errors.Wrap(err, "cannot write on files")
@@ -72,25 +74,23 @@ func (file *adapter) Save(items []user.User) error {
 }
 
 func openFile(filename string) (*os.File, error) {
-	file, err := os.Open(constants.Filelocation)
+	file, err := os.Open(filename)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot open the file")
 	}
 	return file, nil
-
 }
 
-//retriving from file.json
-//unmarsheling into user struct
-func (file *adapter) RetriveAll() ([]user.User, error) {
-	//check for file existence
+// retrieving from file.json.
+// unmarsheling into user struct.
+func (file *Adapter) RetriveAll() ([]user.User, error) {
+	// check for file existence
 	if !checkFileExists(constants.Filelocation) {
-		//else create file
+		// else create file.
 		_, err := removeAndCreateFile()
 		if err != nil {
 			return nil, err
 		}
-
 	}
 
 	fi, err := openFile(constants.Filelocation)
@@ -116,9 +116,4 @@ func (file *adapter) RetriveAll() ([]user.User, error) {
 	}
 
 	return dataret, nil
-}
-
-//constructor
-func NewFileAdapter() (*adapter, error) {
-	return &adapter{}, nil
 }
